@@ -1,0 +1,6 @@
+applicationType: default
+defaultPackage: uk.co.cloudfusion.micronaut
+testFramework: kotest
+sourceLanguage: kotlin
+buildTool: gradle_kotlin
+features: [ annotation-api, app-name, gradle, http-client, kotest, kotlin, kotlin-application, kotlin-build, kotlin-extension-functions, logback, micronaut-build, netty-server, reactor, reactor-http-client, readme, serialization-jackson, shade, yaml ]
