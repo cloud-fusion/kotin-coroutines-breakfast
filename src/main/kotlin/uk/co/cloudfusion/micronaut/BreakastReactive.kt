@@ -26,6 +26,18 @@ class AiChiefReactiveController(
     val childrenReactiveClient: ChildrenReactiveClient,
 ) {
 
+
+    @Get("/breakfaslt/seq/couroutine-addaptor")
+    suspend fun getBreakfastSeqWithCoroutineAdaptors(): List<FoodItems> {
+        val sausages =  fridgeReactiveClient.getSassages().awaitSingle()
+        val bacon =  fridgeReactiveClient.getBacon().awaitSingle()
+        val eggs =  fridgeReactiveClient.getEgg().awaitSingle()
+
+        val friedItems = hobReactiveClient.fry(sausages, bacon, eggs).asFlow()
+        childrenReactiveClient.call().awaitSingle()
+        return friedItems.toList()
+    }
+
     @Get("/breakfaslt/seq")
     fun getBreakfastSeq(): Flux<FoodItems> {
         return fridgeReactiveClient.getSassages()
@@ -35,6 +47,7 @@ class AiChiefReactiveController(
             .doOnNext { childrenReactiveClient.call() }
             .flatMapMany { bes -> hobReactiveClient.fry(bes.first, bes.second, bes.third) }
     }
+
     @Get("/breakfaslt/async/couroutine-addaptor")
     suspend fun getBreakfastWithCoroutineAdaptors(): List<FoodItems> = coroutineScope {
         val sausages = async { fridgeReactiveClient.getSassages().awaitSingle() }
