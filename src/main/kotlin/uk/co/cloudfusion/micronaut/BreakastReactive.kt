@@ -38,14 +38,14 @@ class AiChiefReactiveController(
         return friedItems.toList()
     }
 
-    @Get("/breakfaslt/seq")
+    @Get("/breakfast/seq")
     fun getBreakfastSeq(): Flux<FoodItems> {
         return fridgeReactiveClient.getSassages()
             .flatMap { s-> fridgeReactiveClient.getBacon()
-                .flatMap { b -> fridgeReactiveClient.getEgg().map { e -> Triple(b, e, s) } }
+                .flatMap { b -> fridgeReactiveClient.getEgg().map { e -> listOf(b, e, s) } }
             }
             .doOnNext { childrenReactiveClient.call() }
-            .flatMapMany { bes -> hobReactiveClient.fry(bes.first, bes.second, bes.third) }
+            .flatMapMany(hobReactiveClient::fry)
     }
 
     @Get("/breakfaslt/async/couroutine-addaptor")
@@ -73,8 +73,6 @@ class AiChiefReactiveController(
                 )
                     .map { z -> z.t1 }
             }
-            .doOnNext { println("Cooked $it") }
-            .doOnError { println("Burnt $it") }
     }
 }
 

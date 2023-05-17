@@ -21,7 +21,6 @@ class AiChiefCoroutinesController(
 
     @Get("/breakfaslt/seq")
     suspend fun getBreakfastSeq(): List<FoodItems> {
-        // This is a sequence of calls, each one waiting for the previous one to complete
         val sausages = fridgeCoroutineClient.getSassages()
         val bacon = fridgeCoroutineClient.getBacon()
         val eggs = fridgeCoroutineClient.getEgg()
@@ -38,7 +37,7 @@ class AiChiefCoroutinesController(
         val eggs = async { fridgeCoroutineClient.getEgg() }
 
         val friedItems = hobCoroutineClient.fry(awaitAll(sausages, bacon, eggs))
-        childrenCoroutineClient.call()
+        async { childrenCoroutineClient.call() }
         friedItems.toList()
     }
 }
