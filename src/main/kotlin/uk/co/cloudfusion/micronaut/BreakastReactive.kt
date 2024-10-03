@@ -53,7 +53,6 @@ class AiChiefReactiveController(
         val sausages = async { fridgeReactiveClient.getSassages().awaitSingle() }
         val bacon = async { fridgeReactiveClient.getBacon().awaitSingle() }
         val eggs = async { fridgeReactiveClient.getEgg().awaitSingle() }
-
         val friedItems = hobReactiveClient.fry(awaitAll(sausages, bacon, eggs)).asFlow()
         async { childrenReactiveClient.call().awaitSingle() }
         friedItems.toList()

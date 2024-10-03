@@ -3,6 +3,7 @@ package uk.co.cloudfusion.micronaut
 import io.micronaut.context.annotation.Bean
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Get
+import jdk.internal.org.jline.utils.Colors.s
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -11,6 +12,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.reactor.asFlux
+import kotlinx.coroutines.reactor.mono
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
+import reactor.util.function.Tuple2
 
 @Controller("/api/v1/coroutines")
 class AiChiefCoroutinesController(
@@ -39,6 +45,21 @@ class AiChiefCoroutinesController(
         val friedItems = hobCoroutineClient.fry(awaitAll(sausages, bacon, eggs))
         async { childrenCoroutineClient.call() }
         friedItems.toList()
+    }
+
+    @Get("breakfast/async/flux")
+    fun getBreakfastFlux(): Flux<FoodItems> {
+        val sausages = mono { fridgeCoroutineClient.getSassages() }
+        val bacon = mono { fridgeCoroutineClient.getBacon() }
+        val eggs = mono { fridgeCoroutineClient.getEgg() }
+
+        return Flux.zip(sausages, bacon, eggs)
+            .flatMap {
+                Mono.zip(
+                    mono { childrenCoroutineClient.call() },
+                    mono { hobCoroutineClient.fry(it.t1, it.t2, it.t3) })
+            }
+            .flatMap { it.t2.asFlux()}
     }
 }
 
